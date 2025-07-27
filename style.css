@@ -1,0 +1,121 @@
+/* ===== Reset & Layout ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* ===== Container Layout ===== */
+.containerX {
+  display: flex;
+  height: 100vh;
+  max-width: 1920px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== Left Panel (Input Form) ===== */
+.left {
+  flex: 1;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+.left h1, .left h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea,
+input[type="color"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* ===== Button Style ===== */
+button {
+  padding: 10px 20px;
+  background-color: #e60000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 15px;
+  transition: background-color 0.2s ease;
+  width: 170px;
+}
+
+button:hover {
+  background-color: #cc0000;
+}
+
+/* ===== Products block ===== */
+#products div {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* ===== Right Panel (Output) ===== */
+.right {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.right h2 {
+  margin-bottom: 10px;
+}
+
+textarea#output {
+  width: 100%;
+  height: 80%;
+  font-family: monospace;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .containerX {
+    flex-direction: column;
+  }
+
+  .left, .right {
+    width: 100%;
+    height: auto;
+  }
+
+  textarea#output {
+    height: 300px;
+  }
+}

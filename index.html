@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email HTML Generator</title>
+  <style>
+    .containerX {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      margin: 0 auto;
+      max-width: 1920px;
+    }
+    .left, .right {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .left {
+      background: #f7f7f7;
+      border-right: 1px solid #ddd;
+    }
+    .right {
+      background: #fff;
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    label {
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 20px;
+      background: #e60000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      width: 170px;
+    }
+    #products div {
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    textarea#output {
+      height: 80%;
+      font-family: monospace;
+    }
+    @media (max-width: 768px) {
+      .containerX {
+        flex-direction: column;
+      }
+      .left, .right {
+        width: 100%;
+        height: auto;
+      }
+      textarea#output {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="containerX">
+    <div class="left">
+      <h1>🎉 Google sheet data</h1>
+      <label>🔗 Google Sheets Link</label>
+      <input type="text" id="sheetLink" placeholder="Dán link Google Sheets">
+      <button onclick="loadData()">Load Data</button>
+
+      <h2>📦 Khoản vay</h2>
+      <div id="products"></div>
+      <button onclick="addLoanBlock()">➕ Thêm khoản vay</button>
+
+      <h2>📝 Footer</h2>
+      <label>Văn bản</label>
+      <textarea id="footer" rows="3">Trân trọng,<br>Đội ngũ Hỗ trợ<br>&copy; 2025 Công ty.</textarea>
+
+      <label>Button text</label>
+      <input type="text" id="footerBtnText" placeholder="Nhập nội dung nút">
+
+      <label>Button link</label>
+      <input type="text" id="footerBtnLink" placeholder="Nhập link nút">
+
+      <h2>🌐 Mạng xã hội</h2>
+      <label>Facebook Page</label>
+      <input type="text" id="facebookPage" placeholder="Link Facebook Page">
+
+      <label>Facebook Group</label>
+      <input type="text" id="facebookGroup" placeholder="Link Facebook Group">
+
+      <label>Zalo Group</label>
+      <input type="text" id="zaloGroup" placeholder="Link Zalo Group">
+
+      <label>Telegram Group</label>
+      <input type="text" id="telegramGroup" placeholder="Link Telegram Group">
+
+      <h2>🎯 Banner nhóm</h2>
+      <label>Tiêu đề banner</label>
+      <input type="text" id="bannerTitle" placeholder="VD: Tham gia nhóm để nhận ưu đãi đặc biệt">
+
+      <label>Link ảnh banner</label>
+      <input type="text" id="bannerImage" placeholder="Link ảnh banner">
+
+      <label>Link đích banner</label>
+      <input type="text" id="bannerLink" placeholder="Link khi click vào banner">
+
+      <button onclick="generateHTML()">✨ Generate HTML</button>
+    </div>
+
+    <div class="right">
+      <h2>📄 Output HTML</h2>
+      <textarea id="output"></textarea>
+      <button onclick="copyOutput()">📋 Copy HTML</button>
+    </div>
+  </div>
+
+  <script>
+    function addLoanBlock(name = '', link = '', image = '', description = '') {
+      const productsContainer = document.getElementById("products");
+      const index = productsContainer.children.length + 1;
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <label>Khoản vay ${index}</label>
+        <input type="text" class="loanName" placeholder="Tên khoản vay" value="${name}">
+        <input type="text" class="loanLink" placeholder="Link khoản vay" value="${link}">
+        <input type="text" class="loanImage" placeholder="Link ảnh khoản vay" value="${image}">
+        <textarea class="loanDescription" rows="3" placeholder="Mô tả" style="white-space: pre-wrap;">${description}</textarea>
+      `;
+      productsContainer.appendChild(div);
+    }
+
+    async function loadData() {
+      const sheetLink = document.getElementById("sheetLink").value.trim();
+      const match = sheetLink.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+
+      if (!match) {
+        alert("Vui lòng dán link Google Sheets hợp lệ.");
+        return;
+      }
+
+      const sheetId = match[1];
+      const sheetName = "Sheet1";
+      const apiUrl = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.length === 0) {
+          alert("Sheet không có dữ liệu.");
+          return;
+        }
+
+        const productsContainer = document.getElementById("products");
+        productsContainer.innerHTML = "";
+
+        data.forEach((row) => {
+          addLoanBlock(
+            row['Tên khoản vay'] || '',
+            row['Link khoản vay'] || '',
+            row['Link ảnh khoản vay'] || '',
+            row['Mô tả'] || ''
+          );
+        });
+
+        document.getElementById("footerBtnText").value = data[0]["Button text"] || "";
+        document.getElementById("footerBtnLink").value = data[0]["Button link"] || "";
+        
+        // Load social media data
+        document.getElementById("facebookPage").value = data[0]["Facebook Page"] || "";
+        document.getElementById("facebookGroup").value = data[0]["Facebook Group"] || "";
+        document.getElementById("zaloGroup").value = data[0]["Zalo Group"] || "";
+        document.getElementById("telegramGroup").value = data[0]["Telegram Group"] || "";
+        
+        // Load banner data
+        document.getElementById("bannerTitle").value = data[0]["Banner Title"] || "";
+        document.getElementById("bannerImage").value = data[0]["Banner Image"] || "";
+        document.getElementById("bannerLink").value = data[0]["Banner Link"] || "";
+
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+        alert("Không thể tải dữ liệu từ Google Sheet.");
+      }
+    }
+
+    function generateHTML() {
+      const productDivs = document.querySelectorAll("#products > div");
+      let html = `
+        <div style="max-width:600px;margin:auto;padding:10px;font-family:'Segoe UI',Roboto,sans-serif;">
+          <p style="font-size:16px;line-height:1.6;color:#333;">
+            <strong>Xin chào quý khách,</strong><br>
+            Cảm ơn quý khách đã hoàn tất đăng ký khoản vay tại TamoVN.<br><br>
+            Chúng tôi xin thông báo rằng quý khách hiện đủ điều kiện để đăng ký thêm một khoản vay mới với:
+            <ul style="margin:10px 0 20px 20px;padding:0;">
+              <li>Hạn mức cao hơn</li>
+              <li>Phê duyệt nhanh trong 5 phút</li>
+              <li>Không cần thẩm định lại</li>
+            </ul>
+          </p>
+          <table style="width:100%;border-spacing:10px;">
+      `;
+
+      for (let i = 0; i < productDivs.length; i += 2) {
+        html += '<tr>';
+        for (let j = i; j < i + 2 && j < productDivs.length; j++) {
+          const div = productDivs[j];
+          const name = div.querySelector(".loanName").value;
+          const link = div.querySelector(".loanLink").value;
+          const img = div.querySelector(".loanImage").value;
+          const desc = div.querySelector(".loanDescription").value;
+
+          html += `
+            <td style="width:50%;vertical-align:top;">
+              <div style="border:1px solid #ccc;border-radius:5px;padding:10px;text-align:center;transition:transform 0.3s ease;">
+                <a href="${link}" target="_blank">
+                  <img src="${img}" alt="${name}" style="width:100%;height:auto;max-height:250px;aspect-ratio:1/1;object-fit:cover;border-radius:5px;">
+                </a>
+                <h3 style="font-size:16px;margin:10px 0;color:#e60000;">${name}</h3>
+                <p style="font-size:14px;color:#333;margin:10px 0;white-space:pre-wrap;">${desc}</p>
+                <a href="${link}" style="display:inline-block;background:#ff4500;color:#fff;padding:10px 15px;text-decoration:none;border-radius:5px;font-weight:bold;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:transform 0.2s ease;">
+                  Vay ngay ➤
+                </a>
+              </div>
+            </td>
+          `;
+        }
+        html += '</tr>';
+      }
+
+      html += `</table></div>`;
+
+      const footer = document.getElementById("footer").value;
+      const btnText = document.getElementById("footerBtnText").value;
+      const btnLink = document.getElementById("footerBtnLink").value;
+      
+      // Get social media data
+      const facebookPage = document.getElementById("facebookPage").value;
+      const facebookGroup = document.getElementById("facebookGroup").value;
+      const zaloGroup = document.getElementById("zaloGroup").value;
+      const telegramGroup = document.getElementById("telegramGroup").value;
+      
+      // Get banner data
+      const bannerTitle = document.getElementById("bannerTitle").value;
+      const bannerImage = document.getElementById("bannerImage").value;
+      const bannerLink = document.getElementById("bannerLink").value;
+
+      // Add banner section if data exists
+      if (bannerTitle && bannerImage && bannerLink) {
+        html += `
+          <div style="margin-top:30px;text-align:center;">
+            <h3 style="color:#e60000;margin-bottom:15px;">${bannerTitle}</h3>
+            <a href="${bannerLink}" target="_blank">
+              <img src="${bannerImage}" alt="${bannerTitle}" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+            </a>
+          </div>
+        `;
+      }
+
+      html += `
+        <div style="margin-top:30px;text-align:center;font-family:sans-serif;">
+          <p>${footer}</p>`;
+      
+      // Add main footer button if exists
+      if (btnText && btnLink) {
+        html += `
+          <a href="${btnLink}" style="display:inline-block;background:#000;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;font-weight:bold;transition:all 0.3s ease;margin-bottom:20px;">
+            ${btnText}
+          </a>`;
+      }
+      
+      // Add social media section
+      const socialLinks = [];
+      if (facebookPage) socialLinks.push(`<a href="${facebookPage}" target="_blank" style="color:#1877f2;text-decoration:none;margin:0 10px;">📘 Facebook</a>`);
+      if (facebookGroup) socialLinks.push(`<a href="${facebookGroup}" target="_blank" style="color:#1877f2;text-decoration:none;margin:0 10px;">👥 FB Group</a>`);
+      if (zaloGroup) socialLinks.push(`<a href="${zaloGroup}" target="_blank" style="color:#0068ff;text-decoration:none;margin:0 10px;">💬 Zalo</a>`);
+      if (telegramGroup) socialLinks.push(`<a href="${telegramGroup}" target="_blank" style="color:#0088cc;text-decoration:none;margin:0 10px;">✈️ Telegram</a>`);
+      
+      if (socialLinks.length > 0) {
+        html += `
+          <div style="margin-top:20px;padding-top:15px;border-top:1px solid #eee;">
+            <p style="margin:5px 0;color:#666;font-size:14px;">Kết nối với chúng tôi:</p>
+            <div style="margin:10px 0;">
+              ${socialLinks.join('')}
+            </div>
+          </div>`;
+      }
+      
+      html += `</div>`;
+
+      document.getElementById("output").value = html;
+    }
+
+    function copyOutput() {
+      const output = document.getElementById("output");
+      output.select();
+      document.execCommand("copy");
+      alert("Đã copy HTML!");
+    }
+
+    // Add some demo data on load
+    window.onload = function() {
+      addLoanBlock('Vay tiêu dùng cá nhân', '#', 'https://via.placeholder.com/300x300/ff4500/ffffff?text=Vay+Ca+Nhan', 'Lãi suất ưu đãi 0.8%/tháng\nHạn mức lên đến 500 triệu\nGiải ngân trong 24h');
+      addLoanBlock('Vay mua xe', '#', 'https://via.placeholder.com/300x300/e60000/ffffff?text=Vay+Mua+Xe', 'Lãi suất từ 6.9%/năm\nVay lên đến 80% giá trị xe\nThủ tục đơn giản, nhanh chóng');
+    }
+  </script>
+</body>
+</html>
